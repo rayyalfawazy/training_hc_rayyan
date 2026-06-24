@@ -294,7 +294,7 @@ if submitted:
             </div>
         """, unsafe_allow_html=True)
 
-        sorted_depts = sorted(department_map_inv.items(), key=lambda x: proba[x[0]], reverse=True)
+        sorted_depts = sorted(department_map_inverted.items(), key=lambda x: proba[x[0]], reverse=True)
         bars_html = ""
         for idx, dname in sorted_depts:
             pct    = proba[idx] * 100
