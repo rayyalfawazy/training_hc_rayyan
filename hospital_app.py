@@ -37,7 +37,7 @@ div[data-testid="stCheckbox"] label {
 
 @st.cache_resource
 def load_model():
-    with open('hospital_model.pkl', 'rb') as f:
+    with open('hospital_model_rayyan.pkl', 'rb') as f:
         return pickle.load(f)
 
 bundle        = load_model()
