@@ -40,17 +40,17 @@ def load_model():
     with open('hospital_model_rayyan.pkl', 'rb') as f:
         return pickle.load(f)
 
-bundle        = load_model()
-model         = bundle['model']
-scaler        = bundle['scaler']
-features      = bundle['features']
-cols_to_scale = bundle['cols_to_scale']
-dept_map_inv  = bundle['dept_map_inv']
-gender_map    = bundle['gender_map']
-temp_map      = bundle['temp_map']
-hr_map        = bundle['hr_map']
-dur_map       = bundle['dur_map']
-cc_map        = bundle['cc_map']
+bundle = load_model()
+model = bundle['model']
+scaler = bundle['scaler']
+features = bundle['features']
+column_to_scale = bundle['column_to_scale']
+department_map_inv = bundle['department_map_inverted']
+gender_map = bundle['gender_map']
+temperature_map = bundle['temperature_map']
+heart_rate_map = bundle['heart_rate_map']
+duration_map = bundle['duration_map']
+chief_complaint_map = bundle['chief_complaint_map']
 
 DEPT_INFO = {
     'Respiratory Medicine': {
@@ -153,9 +153,9 @@ with st.form("triage_form"):
 
     col_cc, col_dur = st.columns(2)
     with col_cc:
-        chief_complaint = st.selectbox("Chief complaint", options=list(cc_map.keys()))
+        chief_complaint = st.selectbox("Chief complaint", options=list(chief_complaint_map.keys()))
     with col_dur:
-        duration = st.selectbox("Duration", options=list(dur_map.keys()), index=1)
+        duration = st.selectbox("Duration", options=list(duration_map.keys()), index=1)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -173,9 +173,9 @@ with st.form("triage_form"):
 
     col_temp, col_hr = st.columns(2)
     with col_temp:
-        temperature_level = st.selectbox("Temperature", options=list(temp_map.keys()), index=1)
+        temperature_level = st.selectbox("Temperature", options=list(temperature_map.keys()), index=1)
     with col_hr:
-        heart_rate_level  = st.selectbox("Heart rate", options=list(hr_map.keys()), index=1)
+        heart_rate_level  = st.selectbox("Heart rate", options=list(heart_rate_map.keys()), index=1)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -232,21 +232,21 @@ if submitted:
         'nausea_vomiting'  : int(nausea_vomiting),
         'dizziness'        : int(dizziness),
         'skin_rash'        : int(skin_rash),
-        'temperature_level': temp_map.get(temperature_level, 1),
-        'heart_rate_level' : hr_map.get(heart_rate_level, 1),
-        'duration'         : dur_map.get(duration, 1),
+        'temperature_level': temperature_map.get(temperature_level, 1),
+        'heart_rate_level' : heart_rate_map.get(heart_rate_level, 1),
+        'duration'         : duration_map.get(duration, 1),
         'asthma'           : int(asthma),
         'hypertension'     : int(hypertension),
         'heart_disease'    : int(heart_disease),
-        'chief_complaint'  : cc_map.get(chief_complaint, 9)
+        'chief_complaint'  : chief_complaint_map.get(chief_complaint, 9)
     }])
 
     patient_scaled = patient.copy()
-    patient_scaled[cols_to_scale] = scaler.transform(patient[cols_to_scale])
+    patient_scaled[column_to_scale] = scaler.transform(patient[column_to_scale])
 
     pred       = model.predict(patient_scaled[features])[0]
     proba      = model.predict_proba(patient_scaled[features])[0]
-    dept_name  = dept_map_inv[pred]
+    dept_name  = department_map_inverted[pred]
     confidence = proba[pred] * 100
     info       = DEPT_INFO[dept_name]
 
@@ -294,7 +294,7 @@ if submitted:
             </div>
         """, unsafe_allow_html=True)
 
-        sorted_depts = sorted(dept_map_inv.items(), key=lambda x: proba[x[0]], reverse=True)
+        sorted_depts = sorted(department_map_inv.items(), key=lambda x: proba[x[0]], reverse=True)
         bars_html = ""
         for idx, dname in sorted_depts:
             pct    = proba[idx] * 100
